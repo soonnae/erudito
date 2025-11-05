@@ -43,15 +43,15 @@ class FaissIndex:
 
         """
         reverse_index_file = index_file.parent / "reverse_index.npy"
-        if not index_file.exists():
+        if not index_file.exists() or not index_file.is_file():
             raise ValueError(f"No index found in {index_file}")
-        elif not reverse_index_file.exists():
-            raise ValueError(f"No reverse index found in {self.reverse_index}")
+        elif not reverse_index_file.exists() or not reverse_index_file.is_file():
+            raise ValueError(f"No reverse index found in {reverse_index_file}")
         else:
             self.index = faiss.read_index(str(index_file))
-            self.reverse_index = np.load(
-                str(reverse_index_file), allow_pickle=True
-            ).item()
+            # Use a safer method to load the reverse index
+            with open(reverse_index_file, 'rb') as f:
+                self.reverse_index = np.load(f, allow_pickle=False).item()
 
     def save(self, index_file: Path) -> None:
         """
