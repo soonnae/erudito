@@ -36,8 +36,11 @@ def create_store(chunks: List[str], folder_name: str = "vector_store"):
     """
 
     index = FaissIndex()
-    embeddings = np.empty((len(chunks), llama.n_embd()))
-    index_path = Path("index") / folder_name / "index.faiss"
+    # Sanitize folder_name to prevent path injection
+    safe_folder_name = "".join(c for c in folder_name if c.isalnum() or c in ('_', '-')).strip()
+    if not safe_folder_name:
+        raise ValueError("Invalid folder name provided.")
+    index_path = Path("index") / safe_folder_name / "index.faiss"
 
     # check if the index already exists
     if index_path.exists():
