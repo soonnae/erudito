@@ -36,8 +36,10 @@ def create_store(chunks: List[str], folder_name: str = "vector_store"):
     """
 
     index = FaissIndex()
+    # Sanitize folder_name to prevent path injection
+    safe_folder_name = Path(folder_name).name
     embeddings = np.empty((len(chunks), llama.n_embd()))
-    index_path = Path("index") / folder_name / "index.faiss"
+    index_path = Path("index") / safe_folder_name / "index.faiss"
 
     # check if the index already exists
     if index_path.exists():
@@ -60,7 +62,7 @@ def create_store(chunks: List[str], folder_name: str = "vector_store"):
     # add the embeddings to the vector store
     index.add_vectors(embeddings, chunks)
     index.save(index_path)
-    logger.info(f"🥒 Save FAISS vector store into a pickle in index/{folder_name}")
+    logger.info(f"🥒 Save FAISS vector store into a pickle in index/{safe_folder_name}")
 
 
 def ingest(
