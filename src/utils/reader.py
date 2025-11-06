@@ -126,7 +126,13 @@ def get_sources(documentation_path: str) -> List[str]:
     Returns:
         List of strings: A list of all the documents, split into smaller chunks.
     """
-    ps = list(Path(documentation_path).glob("**/*.*"))
+    # Sanitize the documentation_path to prevent path injection
+    documentation_path = Path(documentation_path).resolve(strict=False)
+    if not documentation_path.is_dir():
+        logger.error(f"Invalid directory path: {documentation_path}")
+        return []
+
+    ps = list(documentation_path.glob("**/*.*"))
     logger.info(f"📖 {len(ps)} documents were found")
 
     data = []

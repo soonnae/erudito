@@ -4,6 +4,7 @@ from typing import List
 
 import faiss
 import numpy as np
+import json
 
 from src.utils.logger import setup_logger
 
@@ -42,16 +43,15 @@ class FaissIndex:
             ValueError: If the index file or reverse index file is not found.
 
         """
-        reverse_index_file = index_file.parent / "reverse_index.npy"
+        reverse_index_file = index_file.parent / "reverse_index.json"
         if not index_file.exists():
             raise ValueError(f"No index found in {index_file}")
         elif not reverse_index_file.exists():
-            raise ValueError(f"No reverse index found in {self.reverse_index}")
+            raise ValueError(f"No reverse index found in {reverse_index_file}")
         else:
             self.index = faiss.read_index(str(index_file))
-            self.reverse_index = np.load(
-                str(reverse_index_file), allow_pickle=True
-            ).item()
+            with open(reverse_index_file, 'r') as f:
+                self.reverse_index = json.load(f)
 
     def save(self, index_file: Path) -> None:
         """
@@ -61,8 +61,9 @@ class FaissIndex:
             index_file (Path): The path to the Faiss index file.
         """
         faiss.write_index(self.index, str(index_file))
-        reverse_index_file = index_file.parent / "reverse_index.npy"
-        np.save(str(reverse_index_file), self.reverse_index)
+        reverse_index_file = index_file.parent / "reverse_index.json"
+        with open(reverse_index_file, 'w') as f:
+            json.dump(self.reverse_index, f)
 
     def add_vectors(self, vectors: np.ndarray, contents: List[str]) -> None:
         """
