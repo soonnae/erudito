@@ -11,6 +11,7 @@ Note:
 import logging
 from pathlib import Path
 from typing import List, Optional
+import re
 
 import numpy as np
 import typer
@@ -25,6 +26,18 @@ from src.utils.reader import get_sources
 logger = setup_logger(__name__, logging.INFO)
 llama: Optional[Llama] = None
 
+def sanitize_folder_name(folder_name: str) -> str:
+    """
+    Sanitize the folder name to prevent path injection vulnerabilities.
+
+    Args:
+        folder_name : str : Required : The name of the folder to be sanitized.
+
+    Returns:
+        str : A sanitized version of the folder name.
+    """
+    # Remove any characters that are not alphanumeric, underscores, or hyphens
+    return re.sub(r'[^a-zA-Z0-9_-]', '_', folder_name)
 
 def create_store(chunks: List[str], folder_name: str = "vector_store"):
     """
@@ -34,6 +47,9 @@ def create_store(chunks: List[str], folder_name: str = "vector_store"):
         chunks : List[str] : Required : A list of text chunks to create the vector store from.
         folder_name : str : Optional : The name of the folder where the vector store will be saved. Default is "vector_store".
     """
+
+    # Sanitize the folder name to prevent path injection
+    folder_name = sanitize_folder_name(folder_name)
 
     index = FaissIndex()
     embeddings = np.empty((len(chunks), llama.n_embd()))
