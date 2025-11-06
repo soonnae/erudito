@@ -35,6 +35,9 @@ def create_store(chunks: List[str], folder_name: str = "vector_store"):
         folder_name : str : Optional : The name of the folder where the vector store will be saved. Default is "vector_store".
     """
 
+    # Sanitize the folder_name to prevent path injection
+    folder_name = Path(folder_name).name  # This ensures only the name is used, preventing path traversal
+
     index = FaissIndex()
     embeddings = np.empty((len(chunks), llama.n_embd()))
     index_path = Path("index") / folder_name / "index.faiss"
