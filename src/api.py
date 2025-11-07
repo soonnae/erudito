@@ -16,7 +16,7 @@ app = FastAPI(title="Erudito", version="0.0.1", description=description)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["https://trusted.domain.com"],  # Replace with actual trusted domains
     allow_credentials=True,
     allow_methods=["GET", "POST"],
     allow_headers=["*"],
